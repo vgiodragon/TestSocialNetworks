@@ -4,11 +4,16 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 
 import com.facebook.CallbackManager;
 import com.facebook.share.model.ShareHashtag;
@@ -16,13 +21,24 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.DefaultLogger;
+import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterConfig;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.tweetcomposer.TweetComposer;
+import com.twitter.sdk.android.tweetui.SearchTimeline;
+import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
+import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
+import com.twitter.sdk.android.tweetui.TweetUtils;
+import com.twitter.sdk.android.tweetui.TweetView;
 
+import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -51,6 +67,7 @@ public class BlankFragment extends Fragment {
     public static final int PICK_IMAGE2 = 1234;
 
 
+    private static String TAG = "GIODEBUG_2";
     //private OnFragmentInteractionListener mListener;
 
     public BlankFragment() {
@@ -89,12 +106,63 @@ public class BlankFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_blank, container, false);
+        /*
+        ListView lv =  v.findViewById(R.id.mlistview);
+        //lv.setEmptyView(findViewById(R.id.loading)); d'ont forget to add loading pic
+
+        SearchTimeline searchTimeline = new SearchTimeline.Builder().query("QhatUNI").build();
+
+        final TweetTimelineListAdapter timelineAdapter = new TweetTimelineListAdapter(getActivity(), searchTimeline);
+
+        lv.setAdapter(timelineAdapter);
+*/
+/*        final RecyclerView recyclerView =  v.findViewById(R.id.recycler);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        final SearchTimeline searchTimeline = new SearchTimeline.Builder()
+                .query("QhatUNI")
+                .maxItemsPerRequest(100)
+                .build();
+
+        final TweetTimelineRecyclerViewAdapter adapter =
+                new TweetTimelineRecyclerViewAdapter.Builder(getActivity())
+                        .setTimeline(searchTimeline)
+                        .setViewStyle(R.style.tw__TweetLightWithActionsStyle)
+                        .build();
+
+        recyclerView.setAdapter(adapter);
+*/
+/*         final LinearLayout myLayout
+               = v.findViewById(R.id.mLinear);
+
+        final long tweetId = 994240118218219520L;
+        TweetUtils.loadTweet(tweetId, new Callback<Tweet>() {
+            @Override
+            public void success(Result<Tweet> result) {
+                myLayout.addView(new TweetView(getContext(), result.data));
+            }
+
+            @Override
+            public void failure(TwitterException exception) {
+                // Toast.makeText(...).show();
+            }
+        });*/
+        final LinearLayout myLayout
+                = v.findViewById(R.id.mLinear);
+        final long tweetId = 994240118218219520L;//GIO
+        final long tweetId2 = 992177699308425217L;//Alf
+        final long tweetId3 = 862733652836397057L;///CTIC
+        LoadTweet(tweetId,myLayout);
+        LoadTweet(tweetId2,myLayout);
+        LoadTweet(tweetId3,myLayout);
+
         btnShareLink = v.findViewById(R.id.btnShareLink);
         btnShareLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                        .setQuote("#QhatUNI2018 #GIODeveloper")
+                        .setQuote("#QhatUNI")
                         .setContentUrl(Uri.parse("https://youtube.com"))
                         .build();
                 if(ShareDialog.canShow(ShareLinkContent.class)){
@@ -129,7 +197,7 @@ public class BlankFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 TweetComposer.Builder builder = new TweetComposer.Builder(getActivity())
-                        .text("#QhatUNI2018");
+                        .text("#QhatUNI");
                         //.image(imageUri);
                 builder.show();
             }
@@ -137,17 +205,31 @@ public class BlankFragment extends Fragment {
         //Init FB
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(getActivity());
-        //For twiter but I didn't see it necessary
-        /*TwitterConfig config = new TwitterConfig.Builder(getActivity())
-                .logger(new DefaultLogger(Log.DEBUG))
-                .twitterAuthConfig(new TwitterAuthConfig("CONSUMER_KEY", "CONSUMER_SECRET"))
-                .debug(true)
-                .build();
-        Twitter.initialize(config);
-        */
+
         return v;
     }
 
+    public void LoadTweet(long tweetId, final LinearLayout myLayout){
+        TweetUtils.loadTweet(tweetId, new Callback<Tweet>() {
+            @Override
+            public void success(Result<Tweet> result) {
+                CardView cardView = new CardView(getActivity());
+                cardView.setRadius(4);
+                cardView.setCardElevation(4f);
+                cardView.setUseCompatPadding(true);
+                cardView.addView(new TweetView(getContext(), result.data, R.style.CustomStyleUNI));
+                myLayout.addView(cardView);
+
+                //myLayout.addView(new di);
+                //Log.d(TAG,"Mi resp"+result.data.());
+            }
+
+            @Override
+            public void failure(TwitterException exception) {
+                // Toast.makeText(...).show();
+            }
+        });
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -165,7 +247,7 @@ public class BlankFragment extends Fragment {
                         .setPhotos(mArrayPhotos)
                         .setShareHashtag(new ShareHashtag
                                 .Builder()
-                                .setHashtag("#QhatUNI2018")
+                                .setHashtag("#QhatUNI")
                                 .build())
                         .build();
                 if (shareDialog.canShow(SharePhotoContent.class)){
@@ -173,7 +255,6 @@ public class BlankFragment extends Fragment {
 
                 }
             }else if (requestCode == PICK_IMAGE2) {
-
                 // Create the new Intent using the 'Send' action.
                 Intent share = new Intent(Intent.ACTION_SEND);
 
@@ -185,7 +266,7 @@ public class BlankFragment extends Fragment {
                 Uri  selectedImage = data.getData();
 
                 // Add the URI to the Intent.
-                share.putExtra(Intent.EXTRA_TEXT, "#QhatUNI2018");
+                share.putExtra(Intent.EXTRA_TEXT, "#QhatUNI");
 
                 share.putExtra(Intent.EXTRA_STREAM, selectedImage);
 
